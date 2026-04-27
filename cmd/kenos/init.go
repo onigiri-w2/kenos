@@ -10,7 +10,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/spf13/cobra"
 
-	"github.com/onigiri/kenos/src/skills"
+	"github.com/onigiri/kenos/payload"
 )
 
 var (
@@ -52,7 +52,8 @@ func runInit() error {
 		return err
 	}
 
-	err = fs.WalkDir(skills.FS, ".", func(path string, d fs.DirEntry, err error) error {
+	skillsFS, _ := fs.Sub(payload.Skills, "skills")
+	err = fs.WalkDir(skillsFS, ".", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
@@ -67,7 +68,7 @@ func runInit() error {
 		}
 
 		if _, statErr := os.Stat(dest); statErr == nil {
-			srcData, _ := fs.ReadFile(skills.FS, path)
+			srcData, _ := fs.ReadFile(skillsFS, path)
 			dstData, _ := os.ReadFile(dest)
 			if string(srcData) == string(dstData) {
 				fmt.Println(styleSkip.Render(fmt.Sprintf("- %s (unchanged)", path)))
@@ -86,7 +87,7 @@ func runInit() error {
 			}
 		}
 
-		data, err := fs.ReadFile(skills.FS, path)
+		data, err := fs.ReadFile(skillsFS, path)
 		if err != nil {
 			return err
 		}
