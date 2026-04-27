@@ -12,9 +12,30 @@ Jira ticketのURLを受け取り、作業場所を準備する。
 
 ## 入力
 
-- `$ARGUMENTS`: Jira ticket の URL
+- `$ARGUMENTS`: Jira ticket の URL **または** ticket番号 (例: `PJ004-982`)
 
-## 手順
+## 分岐: 新規 or 再開
+
+`$ARGUMENTS` を見て分岐する:
+
+- **ticket番号だけ** (例: `PJ004-982`) かつ `.tasks/<ticket-no>/log.md` が存在する → **再開フロー**へ
+- **URL** → **新規フロー**へ
+- **ticket番号だけ** だが `.tasks/<ticket-no>/log.md` が存在しない → 「そのticketの作業場所はまだありません。URLを貼ってください」と返す
+
+---
+
+## 再開フロー
+
+1. `.tasks/<ticket-no>/log.md` を読む
+2. 以下を表示する:
+   - メタ情報(期限、ステータス)
+   - 現在地(わかっていること / わかっていないこと)
+   - 時系列メモの**最後の3件**
+3. 「ここから再開します。何から手をつけますか?」と聞いて始める
+
+---
+
+## 新規フロー
 
 1. URLからticket番号を抽出する (例: `PJ004-982`)
 2. `.tasks/<ticket-no>/` ディレクトリを作成する (既存ならskip)
