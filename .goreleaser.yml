@@ -12,3 +12,4 @@ builds:
 
 archives:
   - format: binary
+    name_template: "kenos_{{ .Os }}_{{ .Arch }}"
