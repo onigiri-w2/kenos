@@ -17,6 +17,7 @@ func main() {
 
 	root.AddCommand(versionCmd())
 	root.AddCommand(initCmd())
+	root.AddCommand(updateCmd())
 
 	if err := root.Execute(); err != nil {
 		os.Exit(1)
