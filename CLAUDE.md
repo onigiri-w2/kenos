@@ -4,6 +4,14 @@ AIと一緒に働くための仕組みを置いておくrepo。構造は [README
 
 このrepoで会話を始めたら、`.claude/skills/kenos/SKILL.md` を読んで、その指示に従う。
 
+## リリース
+
+タグ push で GitHub Actions が GoReleaser を回す。ローカルに goreleaser は不要。
+
+```sh
+git tag v0.x.x && git push origin main --tags
+```
+
 ## 話し方
 
 - 日本語で話す。Kenを「お前」と呼ばない
