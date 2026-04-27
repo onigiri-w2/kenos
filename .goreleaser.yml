@@ -1,0 +1,14 @@
+version: 2
+
+builds:
+  - main: ./cmd/kenos
+    binary: kenos
+    ldflags:
+      - -s -w -X main.version={{.Version}}
+    goos:
+      - darwin
+    goarch:
+      - arm64
+
+archives:
+  - format: binary
