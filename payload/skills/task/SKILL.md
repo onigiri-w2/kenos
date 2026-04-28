@@ -1,24 +1,24 @@
 ---
 name: task
-description: Jira ticketのURLから作業場所を準備し、タスクを開始する
+description: チケットURLから作業場所を準備し、タスクを開始する
 disable-model-invocation: true
 ---
 
 # /task: Ticket着手の初期化
 
-Jira ticketのURLを受け取り、作業場所を準備する。
+チケットのURLを受け取り、作業場所を準備する。
 
-Jira ticketのURLを受け取り、作業場所を準備する。
+チケットのURLを受け取り、作業場所を準備する。
 
 ## 入力
 
-- `$ARGUMENTS`: Jira ticket の URL **または** ticket番号 (例: `PJ004-982`)
+- `$ARGUMENTS`: チケットの URL **または** ticket番号 (例: `PROJ-123`)
 
 ## 分岐: 新規 or 再開
 
 `$ARGUMENTS` を見て分岐する:
 
-- **ticket番号だけ** (例: `PJ004-982`) かつ `.tasks/<ticket-no>/log.md` が存在する → **再開フロー**へ
+- **ticket番号だけ** (例: `PROJ-123`) かつ `.tasks/<ticket-no>/log.md` が存在する → **再開フロー**へ
 - **URL** → **新規フロー**へ
 - **ticket番号だけ** だが `.tasks/<ticket-no>/log.md` が存在しない → 「そのticketの作業場所はまだありません。URLを貼ってください」と返す
 
@@ -37,9 +37,9 @@ Jira ticketのURLを受け取り、作業場所を準備する。
 
 ## 新規フロー
 
-1. URLからticket番号を抽出する (例: `PJ004-982`)
+1. URLからticket番号を抽出する (例: `PROJ-123`)
 2. `.tasks/<ticket-no>/` ディレクトリを作成する (既存ならskip)
-3. Atlassian MCP を使って ticket 本文を取得する
+3. チケット管理ツールの MCP を使って ticket 本文を取得する
 4. `.tasks/<ticket-no>/log.md` を以下の雛形で作成する:
 
 ~~~markdown
