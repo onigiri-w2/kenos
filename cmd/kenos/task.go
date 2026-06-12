@@ -62,7 +62,21 @@ func findTasksDir() (string, error) {
 	return "", fmt.Errorf(".tasks/ が見つかりません")
 }
 
-func parseLogMD(path string) (taskEntry, error) {
+// findTicketMetaFile はticketディレクトリのメタ情報を持つファイルパスを返す。
+// 新形式の overview.md を優先し、無ければ旧形式の log.md にフォールバックする。
+func findTicketMetaFile(ticketDir string) (string, bool) {
+	overview := filepath.Join(ticketDir, "overview.md")
+	if _, err := os.Stat(overview); err == nil {
+		return overview, true
+	}
+	log := filepath.Join(ticketDir, "log.md")
+	if _, err := os.Stat(log); err == nil {
+		return log, true
+	}
+	return "", false
+}
+
+func parseTicketFile(path string) (taskEntry, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return taskEntry{}, err
@@ -126,12 +140,12 @@ func runTaskPick() error {
 		if !e.IsDir() {
 			continue
 		}
-		logPath := filepath.Join(tasksDir, e.Name(), "log.md")
-		if _, err := os.Stat(logPath); err != nil {
+		metaPath, ok := findTicketMetaFile(filepath.Join(tasksDir, e.Name()))
+		if !ok {
 			continue
 		}
 
-		entry, err := parseLogMD(logPath)
+		entry, err := parseTicketFile(metaPath)
 		if err != nil {
 			continue
 		}
