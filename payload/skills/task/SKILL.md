@@ -34,7 +34,7 @@ disable-model-invocation: true
 ├── followup.md     # スコープ外で見つけたもの
 ├── log.md          # 時系列メモ (裏 Claude が更新、表 Claude は読まない)
 ├── habits.md       # 癖の観察 (裏 Claude が記録、表 Claude は読まない)
-└── knowledge/      # 調査・設計知識 (ad hoc命名、ticket内閉じ)
+└── research/      # 調査・設計知識 (ad hoc命名、ticket内閉じ)
 ```
 
 | ファイル | 更新方法 | 主な読み手 |
@@ -45,7 +45,7 @@ disable-model-invocation: true
 | `followup.md` | 見つけたら追加、ticket完了後に引き渡し | ticket後の人間 |
 | `log.md` | append-only | 振り返り時のみ(表 Claude は触らない) |
 | `habits.md` | append-only | 振り返り時のみ(表 Claude は触らない) |
-| `knowledge/*` | トピック単位で追加 | 調査結果を再利用する時 |
+| `research/*` | トピック単位で追加 | 調査結果を再利用する時 |
 
 ---
 
@@ -168,7 +168,7 @@ disable-model-invocation: true
 癖の観察。良い動きも記録する。裏 Claude が transcript から拾って記録する。
 ~~~
 
-### `knowledge/`
+### `research/`
 
 空ディレクトリ。調査メモを ad hoc な命名で追加していく。
 
