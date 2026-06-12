@@ -19,6 +19,7 @@ func main() {
 	root.AddCommand(initCmd())
 	root.AddCommand(updateCmd())
 	root.AddCommand(taskCmd())
+	root.AddCommand(reflectCmd())
 
 	if err := root.Execute(); err != nil {
 		os.Exit(1)

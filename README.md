@@ -15,8 +15,9 @@ chmod +x ~/.kenos/bin/kenos
 ## 使い方
 
 ```sh
-kenos init          # 今いるプロジェクトに skills と .tasks/ を配線
+kenos init          # 今いるプロジェクトに skills / hooks / .tasks/ を配線
 kenos task pick     # .tasks/ からチケットを選んで claude で再開
+kenos reflect       # 裏 Claude による振り返りを手動発火(取りこぼし回収)
 kenos update        # CLI を最新版に自己更新
 kenos version       # バージョン表示
 ```
@@ -27,19 +28,33 @@ kenos version       # バージョン表示
 
 - `kenos.json` — init 済みマーカー
 - `.claude/skills/` — CLIに同梱された skill ファイル群
+- `.claude/hooks/` — session 終了/開始時に裏 Claude を起動する shell スクリプト
+- `.claude/settings.json` — hooks 登録(既存ファイルがあればマージ)
 - `.tasks/` — チケットごとの作業ログ置き場
+- `.kenos/` — 裏 Claude 機構の状態置き場(`current-ticket`, `last-processed`)
 
 既にあるファイルが更新されている場合は上書きするか確認される。
+`.claude/settings.json` は既存の中身を保ったまま hooks エントリのみ追加する。
 
 ### kenos task pick
 
 カレントディレクトリから親を遡り、最初に見つけた `.tasks/` 内のチケットを fzf で一覧表示する。
 チケットを選ぶと `claude` が起動し、`/task <ticket>` で作業を再開する。
 
+### kenos reflect
+
+裏 Claude を手動で起動し、transcript から `log.md` / `habits.md` を更新する。
+
+- 引数なし: `.kenos/last-processed` 以降の最新 transcript を拾う
+- `kenos reflect <path>`: 指定の transcript を処理
+
+通常は session 終了時に hook が自動で発火する。`kenos reflect` は PC強制終了などで hook が走らなかった場合の取りこぼし回収用。
+
 ### kenos update
 
 GitHub Releases から最新バイナリを取得して、今動いているバイナリを置き換える。
-skills は CLI に同梱されているので、update すれば skill も最新になる。
+skills / hooks は CLI に同梱されているので、update すれば一緒に最新になる。
+各プロジェクトに反映するには `kenos init` を再実行する。
 
 ## 構造
 
@@ -48,7 +63,9 @@ kenos/
 ├── cmd/kenos/         # CLI エントリポイント
 ├── payload/
 │   ├── embed.go       # go:embed でバイナリに同梱
-│   └── skills/        # 各プロジェクトに配線する skill
+│   ├── skills/        # 各プロジェクトに配線する skill
+│   ├── hooks/         # 各プロジェクトに配線する hook スクリプト
+│   └── settings.json  # hooks 登録テンプレート
 ├── .claude/skills/
 │   └── kenos/         # kenos 自身のメタ会話用 skill
 ├── doc/
