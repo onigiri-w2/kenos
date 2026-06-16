@@ -29,35 +29,39 @@ disable-model-invocation: true
 ```
 .tasks/<ticket>/
 ├── overview.md     # 設計図 (背景・ゴール・スコープ・現在地・メタ情報)
-├── roadmap.md      # 順序つきTODO (チェックリスト形式)
-├── issues.md       # 論点・人に聞くこと (見出し+議論形式)
+├── roadmap.md      # 方向性。フェーズの大きな区切り
+├── now.md          # 今のフェーズで動くタスク (チェックリスト)
+├── issues.md       # 問い・リスク・気になっていることの inbox (flat bullet)
 ├── followup.md     # スコープ外で見つけたもの
 ├── log.md          # 時系列メモ (裏 Claude が更新、表 Claude は読まない)
 ├── habits.md       # 癖の観察 (裏 Claude が記録、表 Claude は読まない)
-└── research/      # 調査・設計知識 (ad hoc命名、ticket内閉じ)
+└── findings/      # 調査・設計知識 (ad hoc命名、ticket内閉じ)
 ```
 
 | ファイル | 更新方法 | 主な読み手 |
 |---|---|---|
 | `overview.md` | 漸近的に更新(現状把握が進むたび) | session 再開時のAI/人間、振り返り |
-| `roadmap.md` | 順序が動的に変わる、チェック消化 | session毎に表 Claude が更新 |
-| `issues.md` | 論点が出たら追加、解消したら消す | 表 Claude / 人間 |
+| `roadmap.md` | フェーズが進んだら更新。細かい TODO は書かない | session 再開時のAI/人間 |
+| `now.md` | チェック消化、順序が動的に変わる。フェーズが進んだら書き直す | session毎に表 Claude が更新 |
+| `issues.md` | 問いが出たら flat bullet で追加、解消したら消す | 表 Claude / 人間 |
 | `followup.md` | 見つけたら追加、ticket完了後に引き渡し | ticket後の人間 |
 | `log.md` | append-only | 振り返り時のみ(表 Claude は触らない) |
 | `habits.md` | append-only | 振り返り時のみ(表 Claude は触らない) |
-| `research/*` | トピック単位で追加 | 調査結果を再利用する時 |
+| `findings/*` | 自然な単位で追加 | 調査結果を再利用する時 |
+
+**issues と now の関係**: issues は「移送」しない。そのフェーズで解消すべき問いがあれば now にタスクが現れる(手で書く)。now のタスク完了で関連 issue が解消されたら issues.md から消す。ファイル上で紐付けない。
 
 ---
 
 ## 再開フロー
 
-1. `.tasks/<ticket-no>/overview.md`, `roadmap.md`, `issues.md` の3つを読む(**log.md は読まない**)
+1. `.tasks/<ticket-no>/overview.md`, `roadmap.md`, `now.md`, `issues.md` の4つを読む(**log.md は読まない**)
 2. `.kenos/current-ticket` を `.tasks/<ticket-no>` で更新する(裏 Claude機構用)
 3. 以下を表示する:
    - メタ情報(期限、ステータス)
    - 現在地(わかっていること / わかっていないこと)
-   - 次にやること(roadmap の未チェック先頭)
-   - 未解消の論点(issues の見出し一覧)
+   - 次にやること(now の未チェック先頭)
+   - 未解消の問い(issues の bullet 一覧)
 4. 「ここから再開します。何から手をつけますか?」と聞いて始める
 
 ---
@@ -67,7 +71,7 @@ disable-model-invocation: true
 1. URLからticket番号を抽出する (例: `PROJ-123`)
 2. `.tasks/<ticket-no>/` ディレクトリを作成する (既存ならskip)
 3. チケット管理ツールの MCP を使って ticket 本文を取得する
-4. 以下7つを雛形で生成する:
+4. 以下8つを雛形で生成する:
 
 ### `overview.md`
 
@@ -121,25 +125,34 @@ disable-model-invocation: true
 ~~~markdown
 # <ticket-no> roadmap
 
-順序つきTODO。チェック消化で進捗を表す。順序は動的に変わってOK。
+ゴールまでのざっくりした段階。チェックで進捗が見える。
+細かい TODO は書かない(now.md に書く)。
 
 - [ ]
 ~~~
+
+### `now.md`
+
+~~~markdown
+# <ticket-no> now
+
+今の段階で動くタスク。完了したらチェック。
+順序が動的に変わってもよい。
+
+- [ ]
+~~~
+
+**運用**: 1ファイルで固定。roadmap の段階が進んだら中身を新しく書き直す。過去の段階で何をやったかは log.md か git で見る。
 
 ### `issues.md`
 
 ~~~markdown
 # <ticket-no> issues
 
-論点・人に聞くこと。解消したら消す。
+問い・リスク・気になってること・疑問の inbox。
+flat bullet で気軽に書く。解消したら消す。
 
-<!-- 例:
-## XXXの扱いをどうするか
-
-- 選択肢A: ...
-- 選択肢B: ...
-- 確認したい人: @yyy
--->
+-
 ~~~
 
 ### `followup.md`
@@ -168,7 +181,7 @@ disable-model-invocation: true
 癖の観察。良い動きも記録する。裏 Claude が transcript から拾って記録する。
 ~~~
 
-### `research/`
+### `findings/`
 
 空ディレクトリ。調査メモを ad hoc な命名で追加していく。
 
