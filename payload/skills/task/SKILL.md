@@ -53,10 +53,44 @@ disable-model-invocation: true
 
 ---
 
+## session の紐付け
+
+`/task` の最後に、自セッションを ticket に紐付ける。session は ticket の作業実行単位なので、
+1 session が複数 ticket に紐付くのは親子関係として破綻するため禁止する(衝突したらエラーで止める)。
+
+新規/再開どちらのフローでも、`<ticket-no>` を埋めて以下を実行する:
+
+```bash
+if [ -z "${CLAUDE_CODE_SESSION_ID:-}" ]; then
+  echo "ERROR: CLAUDE_CODE_SESSION_ID が未設定です" >&2
+  exit 1
+fi
+encoded=$(pwd | sed 's|/|-|g')
+transcript="${HOME}/.claude/projects/${encoded}/${CLAUDE_CODE_SESSION_ID}.jsonl"
+target=".tasks/<ticket-no>/transcripts"
+
+# 衝突検出: 同じ transcript が別 ticket に登録されていればエラー(状態 [ ] / [x] 問わず)
+for f in .tasks/*/transcripts; do
+  [ -f "$f" ] || continue
+  if grep -qF "$transcript" "$f" && [ "$f" != "$target" ]; then
+    echo "ERROR: この session は $f に既に紐付いている。新しい terminal で /task を実行してください" >&2
+    exit 1
+  fi
+done
+
+# append (dedup)
+mkdir -p "$(dirname "$target")"
+grep -qF "$transcript" "$target" 2>/dev/null || echo "- [ ] $transcript" >> "$target"
+```
+
+衝突エラーが返ったら、Ken にエラーメッセージを伝えてフローを止める。
+
+---
+
 ## 再開フロー
 
 1. `.tasks/<ticket-no>/overview.md`, `roadmap.md`, `now.md`, `issues.md` の4つを読む(**log.md は読まない**)
-2. `.kenos/current-ticket` を `.tasks/<ticket-no>` で更新する(裏 Claude機構用)
+2. 「session の紐付け」を実行する
 3. 以下を表示する:
    - メタ情報(期限、ステータス)
    - 現在地(わかっていること / わかっていないこと)
@@ -170,7 +204,7 @@ flat bullet で気軽に書く。解消したら消す。
 ~~~markdown
 # <ticket-no> log
 
-時系列メモ。session終了時に裏 Claude が append する。表 Claude は触らない。
+時系列メモ。`kenos reflect` で裏 Claude が append する。表 Claude は触らない。
 ~~~
 
 ### `habits.md`
@@ -185,7 +219,7 @@ flat bullet で気軽に書く。解消したら消す。
 
 空ディレクトリ。調査メモを ad hoc な命名で追加していく。
 
-5. プロジェクト直下に `.kenos/current-ticket` を作成し、`.tasks/<ticket-no>` を書き込む(裏 Claude機構が読む)
+5. 「session の紐付け」を実行する
 6. 作成したパス一覧を表示する
 7. 「現在地を埋めるフェーズ」に入る(下記参照)
 

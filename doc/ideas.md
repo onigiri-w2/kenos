@@ -97,6 +97,12 @@
 危険なのは「AI 発火の自動化」。ただの記録(bookkeeping)の自動化は安全。
 SessionEnd / SessionStart フックの中で `claude -p` を起動すると、headless の `claude -p` 自身も SessionStart/SessionEnd を発火するので fork bomb になる。
 
+## `.current-ticket` を廃止して per-session 紐付けにする
+
+- **思いついた場面**: 2026-06-16 メタ会話。「ticket-A をやってる最中に ticket-B もやりたくなった時、`currentTicket` があると A を気にしてしまって B ができない」という実感から。深掘りすると、`.kenos/current-ticket` という単一スロットの存在自体が「今は1つしかやれない」というメンタルモデルを Ken に被せていた
+- **解消した時の影響**: 並行 session が干渉しなくなる。実装の都合(session→ticket 紐付けの保存場所)がユーザーのメンタルモデル(=「current」)に漏れていたのが解消される
+- **状態**: redesign 化(`redesign-2026-06-16-session-ticket.md` に移管。実装は別 session で)
+
 ---
 
 ## 運用メモ

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"io/fs"
 	"os"
@@ -75,40 +74,7 @@ func runInit() error {
 	}
 	fmt.Println(styleInfo.Render("  skills installed to .claude/skills/"))
 
-	// 3. .claude/hooks/
-	hooksDir := filepath.Join(wd, ".claude", "hooks")
-	if err := os.MkdirAll(hooksDir, 0755); err != nil {
-		return err
-	}
-
-	hooksFS, _ := fs.Sub(payload.Hooks, "hooks")
-	err = fs.WalkDir(hooksFS, ".", func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-		if path == "." {
-			return nil
-		}
-
-		dest := filepath.Join(hooksDir, path)
-
-		if d.IsDir() {
-			return os.MkdirAll(dest, 0755)
-		}
-
-		return copyWithConfirm(hooksFS, path, dest, 0755)
-	})
-	if err != nil {
-		return err
-	}
-	fmt.Println(styleInfo.Render("  hooks installed to .claude/hooks/"))
-
-	// 4. .claude/settings.json (マージ)
-	if err := installSettings(wd); err != nil {
-		return err
-	}
-
-	// 5. .tasks/
+	// 3. .tasks/
 	tasksDir := filepath.Join(wd, ".tasks")
 	if _, err := os.Stat(tasksDir); os.IsNotExist(err) {
 		if err := os.MkdirAll(tasksDir, 0755); err != nil {
@@ -117,17 +83,6 @@ func runInit() error {
 		fmt.Println(styleSuccess.Render("✓ created .tasks/"))
 	} else {
 		fmt.Println(styleSkip.Render("- .tasks/ already exists"))
-	}
-
-	// 6. .kenos/ (裏 Claude 機構の状態置き場)
-	kenosDir := filepath.Join(wd, ".kenos")
-	if _, err := os.Stat(kenosDir); os.IsNotExist(err) {
-		if err := os.MkdirAll(kenosDir, 0755); err != nil {
-			return err
-		}
-		fmt.Println(styleSuccess.Render("✓ created .kenos/"))
-	} else {
-		fmt.Println(styleSkip.Render("- .kenos/ already exists"))
 	}
 
 	return nil
@@ -167,94 +122,4 @@ func copyWithConfirm(srcFS fs.FS, srcPath, dest string, perm os.FileMode) error 
 	}
 	fmt.Println(styleSuccess.Render(fmt.Sprintf("✓ %s", relPath)))
 	return nil
-}
-
-// installSettings は payload の settings.json を .claude/settings.json にマージする。
-// hooks の SessionEnd が無ければ追加し、既にあれば触らない。
-func installSettings(wd string) error {
-	src, err := payload.Settings.ReadFile("settings.json")
-	if err != nil {
-		return err
-	}
-
-	var srcMap map[string]any
-	if err := json.Unmarshal(src, &srcMap); err != nil {
-		return err
-	}
-
-	dest := filepath.Join(wd, ".claude", "settings.json")
-
-	if _, err := os.Stat(dest); os.IsNotExist(err) {
-		if err := os.WriteFile(dest, src, 0644); err != nil {
-			return err
-		}
-		fmt.Println(styleSuccess.Render("✓ .claude/settings.json"))
-		return nil
-	}
-
-	existing, err := os.ReadFile(dest)
-	if err != nil {
-		return err
-	}
-
-	var existingMap map[string]any
-	if err := json.Unmarshal(existing, &existingMap); err != nil {
-		return fmt.Errorf(".claude/settings.json のパースに失敗: %w", err)
-	}
-
-	added, err := mergeHooks(existingMap, srcMap)
-	if err != nil {
-		return err
-	}
-	if len(added) == 0 {
-		fmt.Println(styleSkip.Render("- .claude/settings.json (hooks 既に設定済み)"))
-		return nil
-	}
-
-	var confirm bool
-	huh.NewConfirm().
-		Title(fmt.Sprintf(".claude/settings.json に hook %v を追加しますか?", added)).
-		Value(&confirm).
-		Run()
-	if !confirm {
-		fmt.Println(styleSkip.Render("- .claude/settings.json skipped"))
-		return nil
-	}
-
-	merged, err := json.MarshalIndent(existingMap, "", "  ")
-	if err != nil {
-		return err
-	}
-	merged = append(merged, '\n')
-
-	if err := os.WriteFile(dest, merged, 0644); err != nil {
-		return err
-	}
-	fmt.Println(styleSuccess.Render(fmt.Sprintf("✓ .claude/settings.json (merged: %v)", added)))
-	return nil
-}
-
-// mergeHooks は src の hooks エントリのうち、dst にまだ無いものを dst に追加する。
-// 追加した hook キーのリストを返す。
-func mergeHooks(dst, src map[string]any) ([]string, error) {
-	srcHooks, ok := src["hooks"].(map[string]any)
-	if !ok {
-		return nil, nil
-	}
-
-	dstHooks, _ := dst["hooks"].(map[string]any)
-	if dstHooks == nil {
-		dstHooks = map[string]any{}
-		dst["hooks"] = dstHooks
-	}
-
-	var added []string
-	for key, val := range srcHooks {
-		if _, exists := dstHooks[key]; exists {
-			continue
-		}
-		dstHooks[key] = val
-		added = append(added, key)
-	}
-	return added, nil
 }
