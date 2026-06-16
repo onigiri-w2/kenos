@@ -16,18 +16,18 @@ disable-model-invocation: true
 
 `$ARGUMENTS` を見て分岐する:
 
-- **ticket番号だけ** (例: `PROJ-123`) かつ `.tasks/<ticket-no>/overview.md` が存在する → **再開フロー**へ
+- **ticket番号だけ** (例: `PROJ-123`) かつ `.kenos/tickets/<ticket-no>/overview.md` が存在する → **再開フロー**へ
 - **URL** → **新規フロー**へ
-- **ticket番号だけ** だが `.tasks/<ticket-no>/overview.md` が存在しない → 「そのticketの作業場所はまだありません。URLを貼ってください」と返す
+- **ticket番号だけ** だが `.kenos/tickets/<ticket-no>/overview.md` が存在しない → 「そのticketの作業場所はまだありません。URLを貼ってください」と返す
 
 ---
 
 ## ファイル構造
 
-`.tasks/<ticket-no>/` の中身は以下:
+`.kenos/tickets/<ticket-no>/` の中身は以下:
 
 ```
-.tasks/<ticket>/
+.kenos/tickets/<ticket>/
 ├── overview.md     # 設計図 (背景・ゴール・スコープ・現在地・メタ情報)
 ├── roadmap.md      # 方向性。フェーズの大きな区切り
 ├── now.md          # 今のフェーズで動くタスク (チェックリスト)
@@ -67,10 +67,10 @@ if [ -z "${CLAUDE_CODE_SESSION_ID:-}" ]; then
 fi
 encoded=$(pwd | sed 's|/|-|g')
 transcript="${HOME}/.claude/projects/${encoded}/${CLAUDE_CODE_SESSION_ID}.jsonl"
-target=".tasks/<ticket-no>/transcripts"
+target=".kenos/tickets/<ticket-no>/transcripts"
 
 # 衝突検出: 同じ transcript が別 ticket に登録されていればエラー(状態 [ ] / [x] 問わず)
-for f in .tasks/*/transcripts; do
+for f in .kenos/tickets/*/transcripts; do
   [ -f "$f" ] || continue
   if grep -qF "$transcript" "$f" && [ "$f" != "$target" ]; then
     echo "ERROR: この session は $f に既に紐付いている。新しい terminal で /task を実行してください" >&2
@@ -89,7 +89,7 @@ grep -qF "$transcript" "$target" 2>/dev/null || echo "- [ ] $transcript" >> "$ta
 
 ## 再開フロー
 
-1. `.tasks/<ticket-no>/overview.md`, `roadmap.md`, `now.md`, `issues.md` の4つを読む(**log.md は読まない**)
+1. `.kenos/tickets/<ticket-no>/overview.md`, `roadmap.md`, `now.md`, `issues.md` の4つを読む(**log.md は読まない**)
 2. 「session の紐付け」を実行する
 3. 以下を表示する:
    - メタ情報(期限、ステータス)
@@ -103,7 +103,7 @@ grep -qF "$transcript" "$target" 2>/dev/null || echo "- [ ] $transcript" >> "$ta
 ## 新規フロー
 
 1. URLからticket番号を抽出する (例: `PROJ-123`)
-2. `.tasks/<ticket-no>/` ディレクトリを作成する (既存ならskip)
+2. `.kenos/tickets/<ticket-no>/` ディレクトリを作成する (既存ならskip)
 3. チケット管理ツールの MCP を使って ticket 本文を取得する
 4. 以下8つを雛形で生成する:
 

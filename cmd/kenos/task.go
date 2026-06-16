@@ -37,7 +37,7 @@ type taskEntry struct {
 	status string
 }
 
-func findTasksDir() (string, error) {
+func findTicketsDir() (string, error) {
 	dir, err := os.Getwd()
 	if err != nil {
 		return "", err
@@ -46,7 +46,7 @@ func findTasksDir() (string, error) {
 	home, _ := os.UserHomeDir()
 
 	for {
-		candidate := filepath.Join(dir, ".tasks")
+		candidate := filepath.Join(dir, ".kenos", "tickets")
 		if info, err := os.Stat(candidate); err == nil && info.IsDir() {
 			return candidate, nil
 		}
@@ -59,7 +59,7 @@ func findTasksDir() (string, error) {
 		}
 		dir = parent
 	}
-	return "", fmt.Errorf(".tasks/ が見つかりません")
+	return "", fmt.Errorf(".kenos/tickets/ が見つかりません")
 }
 
 // findTicketMetaFile はticketディレクトリのメタ情報を持つファイルパスを返す。
@@ -125,12 +125,12 @@ func truncate(s string, max int) string {
 }
 
 func runTaskPick() error {
-	tasksDir, err := findTasksDir()
+	ticketsDir, err := findTicketsDir()
 	if err != nil {
 		return err
 	}
 
-	entries, err := os.ReadDir(tasksDir)
+	entries, err := os.ReadDir(ticketsDir)
 	if err != nil {
 		return err
 	}
@@ -140,7 +140,7 @@ func runTaskPick() error {
 		if !e.IsDir() {
 			continue
 		}
-		metaPath, ok := findTicketMetaFile(filepath.Join(tasksDir, e.Name()))
+		metaPath, ok := findTicketMetaFile(filepath.Join(ticketsDir, e.Name()))
 		if !ok {
 			continue
 		}
@@ -185,7 +185,7 @@ func runTaskPick() error {
 		return fmt.Errorf("claude が見つかりません")
 	}
 
-	projectDir := filepath.Dir(tasksDir)
+	projectDir := filepath.Dir(filepath.Dir(ticketsDir))
 	if err := os.Chdir(projectDir); err != nil {
 		return err
 	}

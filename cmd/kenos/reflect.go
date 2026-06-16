@@ -189,10 +189,10 @@ func writeTranscripts(path string, entries []transcriptEntry) error {
 	return os.Rename(tmpPath, path)
 }
 
-// listTickets は .tasks/ 配下の ticket directory を全列挙する。
+// listTickets は .kenos/tickets/ 配下の ticket directory を全列挙する。
 func listTickets(wd string) ([]string, error) {
-	tasksDir := filepath.Join(wd, ".tasks")
-	entries, err := os.ReadDir(tasksDir)
+	ticketsDir := filepath.Join(wd, ".kenos", "tickets")
+	entries, err := os.ReadDir(ticketsDir)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nil, nil
@@ -202,13 +202,13 @@ func listTickets(wd string) ([]string, error) {
 	var tickets []string
 	for _, e := range entries {
 		if e.IsDir() {
-			tickets = append(tickets, filepath.Join(tasksDir, e.Name()))
+			tickets = append(tickets, filepath.Join(ticketsDir, e.Name()))
 		}
 	}
 	return tickets, nil
 }
 
-// findTicketByTranscript は .tasks/*/transcripts を逆引きして
+// findTicketByTranscript は .kenos/tickets/*/transcripts を逆引きして
 // 指定 transcript path を含む ticket directory を返す。
 func findTicketByTranscript(wd, target string) (string, error) {
 	tickets, err := listTickets(wd)

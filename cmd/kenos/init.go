@@ -35,18 +35,7 @@ func runInit() error {
 		return err
 	}
 
-	// 1. kenos.json
-	kenosJSON := filepath.Join(wd, "kenos.json")
-	if _, err := os.Stat(kenosJSON); os.IsNotExist(err) {
-		if err := os.WriteFile(kenosJSON, []byte("{}\n"), 0644); err != nil {
-			return err
-		}
-		fmt.Println(styleSuccess.Render("✓ created kenos.json"))
-	} else {
-		fmt.Println(styleSkip.Render("- kenos.json already exists"))
-	}
-
-	// 2. .claude/skills/
+	// 1. .claude/skills/
 	skillsDir := filepath.Join(wd, ".claude", "skills")
 	if err := os.MkdirAll(skillsDir, 0755); err != nil {
 		return err
@@ -74,15 +63,15 @@ func runInit() error {
 	}
 	fmt.Println(styleInfo.Render("  skills installed to .claude/skills/"))
 
-	// 3. .tasks/
-	tasksDir := filepath.Join(wd, ".tasks")
-	if _, err := os.Stat(tasksDir); os.IsNotExist(err) {
-		if err := os.MkdirAll(tasksDir, 0755); err != nil {
+	// 2. .kenos/tickets/
+	ticketsDir := filepath.Join(wd, ".kenos", "tickets")
+	if _, err := os.Stat(ticketsDir); os.IsNotExist(err) {
+		if err := os.MkdirAll(ticketsDir, 0755); err != nil {
 			return err
 		}
-		fmt.Println(styleSuccess.Render("✓ created .tasks/"))
+		fmt.Println(styleSuccess.Render("✓ created .kenos/tickets/"))
 	} else {
-		fmt.Println(styleSkip.Render("- .tasks/ already exists"))
+		fmt.Println(styleSkip.Render("- .kenos/tickets/ already exists"))
 	}
 
 	return nil

@@ -1,16 +1,16 @@
 ---
 name: task-sync
-description: .tasks/配下のoverview.mdとチケット管理ツールのステータスを照合し、完了済みticketを一括同期する
+description: .kenos/tickets/配下のoverview.mdとチケット管理ツールのステータスを照合し、完了済みticketを一括同期する
 disable-model-invocation: true
 ---
 
 # /task-sync: 完了ステータスの一括同期
 
-`.tasks/` 配下の `overview.md` を走査し、チケット管理ツール側で完了しているのに `overview.md` が完了になっていないticketを検出して同期する。
+`.kenos/tickets/` 配下の `overview.md` を走査し、チケット管理ツール側で完了しているのに `overview.md` が完了になっていないticketを検出して同期する。
 
 ## 手順
 
-1. `.tasks/` 配下の各ディレクトリを走査し、`overview.md` の1行目(ticket番号)と「ステータス」欄を読む
+1. `.kenos/tickets/` 配下の各ディレクトリを走査し、`overview.md` の1行目(ticket番号)と「ステータス」欄を読む
    - `overview.md` がなく `log.md` だけある旧形式のticketは `log.md` から読む
 2. ticket番号を以下に分類:
    - チケット管理ツール形式(例: `PROJ-123`、プロジェクトキー + ハイフン + 数字)
