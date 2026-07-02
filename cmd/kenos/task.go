@@ -190,5 +190,5 @@ func runTaskPick() error {
 		return err
 	}
 
-	return syscall.Exec(claudePath, []string{"claude", fmt.Sprintf("/task %s", ticket)}, os.Environ())
+	return syscall.Exec(claudePath, []string{"claude", "--model", "haiku", fmt.Sprintf("/task %s", ticket)}, os.Environ())
 }
