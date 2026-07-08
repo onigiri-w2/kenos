@@ -22,13 +22,16 @@ func taskCmd() *cobra.Command {
 }
 
 func taskPickCmd() *cobra.Command {
-	return &cobra.Command{
+	var all bool
+	cmd := &cobra.Command{
 		Use:   "pick",
 		Short: "タスクを選んで claude で再開する",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runTaskPick()
+			return runTaskPick(all)
 		},
 	}
+	cmd.Flags().BoolVarP(&all, "all", "a", false, "完了済みも含めて全て表示する")
+	return cmd
 }
 
 type taskEntry struct {
@@ -124,7 +127,7 @@ func truncate(s string, max int) string {
 	return string(runes[:max-1]) + "…"
 }
 
-func runTaskPick() error {
+func runTaskPick(all bool) error {
 	ticketsDir, err := findTicketsDir()
 	if err != nil {
 		return err
@@ -158,6 +161,10 @@ func runTaskPick() error {
 		}
 		if entry.status == "" {
 			entry.status = "不明"
+		}
+
+		if !all && strings.HasPrefix(entry.status, "完了") {
+			continue
 		}
 
 		line := fmt.Sprintf("%-15s  %-10s  %s", entry.ticket, entry.status, entry.title)
